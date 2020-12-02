@@ -31,6 +31,7 @@ How many passwords are valid according to their policies?
 
 
 ```{r}
+<<<<<<< HEAD
 library(tictoc)
 tic()
 # library(tidyverse)
@@ -51,6 +52,24 @@ data %>%
   dplyr::filter(dplyr::between(n, min, max)) %>% 
   nrow()
 toc()
+=======
+library(tidyverse)
+library(tidytext)
+data <- read_tsv("./data/day_2_data.txt", col_names = FALSE) %>%
+  separate(X1, into = c("num", "letter", "password"), sep = " ") %>%
+  separate(num, into = c("min", "max"), sep = "-") %>%
+  mutate(letter = str_remove(letter, ":"),
+         pw = row_number()) %>%
+  unnest_tokens(output = "char", input = password, token = "characters") 
+
+
+data %>%
+  filter(char == letter) %>%
+  group_by(min, max, pw, letter) %>%
+  summarise(n = n()) %>%
+  filter(between(n, min, max)) %>% nrow()
+  
+>>>>>>> f1272deb65d7ea031c4807dad9eb812c58d8183b
          
 ```
 
@@ -70,6 +89,7 @@ How many passwords are valid according to the new interpretation of the policies
 
 
 ```{r}
+<<<<<<< HEAD
 tic()
 data %>% 
   dplyr::group_by(pw) %>%
@@ -103,3 +123,11 @@ toc()
 That's the right answer! You are one gold star closer to saving your vacation.
 
 
+=======
+data %>% group_by(pw) %>%
+  mutate(seq = row_number()) %>%
+  filter(char == letter & (seq == min | seq == max)) %>%
+  add_count(pw) %>% filter(n == 1) %>% nrow()
+```
+
+>>>>>>> f1272deb65d7ea031c4807dad9eb812c58d8183b

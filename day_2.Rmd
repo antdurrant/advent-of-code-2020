@@ -86,8 +86,10 @@ That's the right answer! You are one gold star closer to saving your vacation.
 
 # Remove whitespace for speeeeeed
 ```{r}
+library(tidytext)
+library(tidyverse)
 tic()
-data<-read_tsv("./data/day_2_data.txt",col_names=FALSE)%>%separate(X1,into=c("num","letter","password"),sep="")%>%separate(num,into=c("min","max"),sep="-")%>%mutate(letter=str_remove(letter,":"),pw=row_number())%>%unnest_tokens(output="char",input=password,token="characters")
+data<-read_tsv("./data/day_2_data.txt",col_names=FALSE)%>%separate(X1,into=c("num","letter","password"),sep=" ")%>%separate(num,into=c("min","max"),sep="-")%>%mutate(letter=str_remove(letter,":"),pw=row_number())%>%unnest_tokens(output="char",input=password,token="characters")
 data%>%filter(char==letter)%>%group_by(min,max,pw,letter)%>%summarise(n=n())%>%filter(between(n,min,max))%>%nrow()
 toc()
 ```
@@ -104,4 +106,3 @@ That's the right answer! You are one gold star closer to saving your vacation.
 
 
 
-d

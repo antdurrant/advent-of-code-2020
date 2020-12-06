@@ -180,15 +180,22 @@ cid (Country ID) - ignored, missing or not.
 
 ```{r}
 validate <- function(data, 
-                     as_num = c("iyr","byr","hgt","pid", "cid"), 
-                     cases){
+                     as_num = c("iyr","byr","hgt","pid", "cid"),
+                      ){
   data %>% 
     pivot_wider(names_from = key, values_from = value) %>%
     mutate(hgt_unit = str_remove_all(hgt, "\\d"),
            across(as_num, as.numeric)) %>%
-    filter(cases)
+    filter(
+      between(byr, 1920, 2002),
+      between(iyr, 2010, 2020),
+      between(eyr, 2020, 2030),
+      hgt_unit == "cm" & between(hgt, 59, 76)m
+      hgt_unit == "cm" & between(hgt, 150, 193),
+      hcl
 }
 
-validate(cases = list(byr = between(1920, 2002)),iyr = between(2010, 2020)  )
+validate(data = b
+         )
 ```
 

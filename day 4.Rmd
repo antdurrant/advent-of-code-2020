@@ -1,0 +1,68 @@
+---
+title: "day 4"
+author: "Anthony Durrant"
+date: "12/4/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+library(tidyverse)
+
+test_data <- "ecl:gry pid:860033327 eyr:2020 hcl:#fffffd
+byr:1937 iyr:2017 cid:147 hgt:183cm
+
+iyr:2013 ecl:amb cid:350 eyr:2023 pid:028048884
+hcl:#cfa07d byr:1929
+
+hcl:#ae17e1 iyr:2013
+eyr:2024
+ecl:brn pid:760753108 byr:1931
+hgt:179cm
+
+hcl:#cfa07d eyr:2025 pid:166559648
+iyr:2011 ecl:brn hgt:59in"
+```
+
+
+
+
+```{r}
+data <- read_delim("./data/day_4_data.txt", delim = "\n\n", col_names = FALSE)
+
+input <- tibble(file = read_file("./data/day_4_data.txt"))
+clean_data <- function(data, exception = "cid"){
+  
+  val <- tibble(cat = c("byr","iyr","eyr", "hgt","hcl","ecl","pid","cid"))  
+
+  data %>%
+    separate_rows(file, sep = "\\\n\\n") %>%
+    mutate(id = row_number(), .before = file) %>%
+    separate_rows(file, sep = "\\s") %>%
+    separate(file, into = c("cat", "value"), sep = ":") %>%
+    full_join(val)
+
+  }
+
+
+clean_data(data )
+
+df <- clean_data(input)
+
+valid_passports <- function(data = df, exception = "cid"){
+  valid<-  data %>%
+    mutate(value = if_else(cat == exception & is.na(value),
+                           "VALID", 
+                           value)) %>%
+    add_count(id) %>%
+    filter(n != 8)
+}
+valid_passports(df)
+
+nrow(df) - nrow(invalid_passports(df))
+```
+

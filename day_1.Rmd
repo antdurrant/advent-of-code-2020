@@ -552,6 +552,7 @@ tictoc::toc()
 ```{r}
 
 tictoc::tic()
+library(tidyverse)
 vec <- read.delim("./data/day_1_data.txt", sep = "\n", header = FALSE)$V1
 
 
@@ -578,8 +579,9 @@ part_2 <- prepped %>% filter(res < 2020 - min(A)) %>%
   mutate(answer = Var1*Var2*Var3) %>%
   distinct(answer) %>%
   pull(answer)
-tictoc::toc()
 part_2
+tictoc::toc()
+
 ```
 
 
@@ -624,4 +626,27 @@ prod(C[1,])
 tictoc::toc()
 ```
 
+
+```{r}
+
+filt <- function(x, y) x + y != 2020
+sums <-
+  cross2(A, A, .filter = filt) %>%
+  map(lift(`*`)) %>% 
+  pluck()
+
+print(sums)
+
+filter2 <- function(x, y, z) x + y + z != 2020
+funs <- function(x, y, z) {
+  `*`(`*`(x, y), z)
+}
+
+sums2 <-
+  cross3(A, A, A, .filter = filter2) %>% 
+  pmap(~ funs(..1, ..2, ..3)) %>% 
+  pluck(2)
+
+print(sums2)
+```
 

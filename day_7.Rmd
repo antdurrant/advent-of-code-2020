@@ -81,31 +81,79 @@ data <- tibble(data = read_file("./data/day_7_data.txt")) %>%
          ) %>%
   filter(!is.na(n))
 
- data %>% group_by(colour) %>%
-  select(-n) %>% 
-  pivot_wider(id_cols = c("id", "colour"), names_from = contains, values_from = contains)  
+ data %>% group_by(colour) %>% 
+  pivot_wider(id_cols = c("id", "colour"), names_from = contains, values_from = n)  
  
  
- data1 <- data %>% filter(contains == "shinygold") 
-   data2 <- data %>% filter(contains %in% unique(data1$colour)) 
-   data3 <- data %>% filter(contains %in% unique(data2$colour))
-   data4 <- data %>% filter(contains %in% unique(data3$colour))
-   data5 <- data %>% filter(contains %in% unique(data4$colour))
-   
-d1 <- bind_rows(data1, data2, data3, data4, data5)   %>% distinct(contains) 
+ colours <- unique(data$colour)
+ 
+ contain_gold <- data %>% filter(contains == "shinygold") %>% pull(colour)
+ 
+ layer_1 <- data %>% filter(contains %in% contain_gold) %>% pull(colour)
+ 
+ layer_2 <- data %>% filter(contains %in% layer_1) %>% pull(colour)
+ 
+ layer_3 <- data %>% filter(contains %in% layer_2) %>% pull(colour)
+ 
+ layer_4 <- data %>% filter(contains %in% layer_3) %>% pull(colour)
+ 
+ layer_5 <- data %>% filter(contains %in% layer_4) %>% pull(colour)
+ 
+ layer_6 <- data %>% filter(contains %in% layer_5) %>% pull(colour)
+ 
+ layer_7 <- data %>% filter(contains %in% layer_6) %>% pull(colour)
+ 
+ layer_8 <- data %>% filter(contains %in% layer_7) %>% pull(colour)
+ 
+ layer_9 <- data %>% filter(contains %in% layer_8) %>% pull(colour)
+ 
+ layer_10 <- data %>% filter(contains %in% layer_9) %>% pull(colour)
+ 
+ layer_11 <- data %>% filter(contains %in% layer_10) %>% pull(colour)
+ 
+ c(layer_1, layer_2, layer_3, layer_4, layer_5, layer_6, layer_7, layer_8, layer_9, layer_10, contain_gold) %>%
+   unique() %>%
+   length()
+ 
 
-   data6 <- data %>% filter(contains %in% unique(data5$colour) )
-   data7 <- data %>% filter(contains %in% unique(data6$colour))
-   data8 <- data %>% filter(contains %in% unique(data7$colour))
-   data9 <- data %>% filter(contains %in% unique(data8$colour))
-   data10 <- data %>% filter(contains %in% unique(data9$colour))
-   data11 <- data %>% filter(contains %in% unique(data10$colour))
-d2 <- bind_rows(d1, data6, data7, data8, data9, data10) %>% distinct(contains)   
-   data12 <- data %>% filter(contains %in% unique(data11$colour))
-   data13 <- data %>% filter(contains %in% unique(data12$colour))
-   data14 <- data %>% filter(contains %in% unique(data13$colour))
-d3 <- bind_rows(d2, data12) %>% distinct(contains) %>% filter(contains != "shinygold")
-   
-   data %>% group_by(contains)
+```
+
+
+--- Part Two ---
+It's getting pretty expensive to fly these days - not because of ticket prices, but because of the ridiculous number of bags you need to buy!
+
+Consider again your shiny gold bag and the rules from the above example:
+
+faded blue bags contain 0 other bags.
+dotted black bags contain 0 other bags.
+vibrant plum bags contain 11 other bags: 5 faded blue bags and 6 dotted black bags.
+dark olive bags contain 7 other bags: 3 faded blue bags and 4 dotted black bags.
+So, a single shiny gold bag must contain 1 dark olive bag (and the 7 bags within it) plus 2 vibrant plum bags (and the 11 bags within each of those): 1 + 1*7 + 2 + 2*11 = 32 bags!
+
+Of course, the actual rules have a small chance of going several levels deeper than this example; be sure to count all of the bags, even if the nesting becomes topologically impractical!
+
+Here's another example:
+
+shiny gold bags contain 2 dark red bags.
+dark red bags contain 2 dark orange bags.
+dark orange bags contain 2 dark yellow bags.
+dark yellow bags contain 2 dark green bags.
+dark green bags contain 2 dark blue bags.
+dark blue bags contain 2 dark violet bags.
+dark violet bags contain no other bags.
+In this example, a single shiny gold bag must contain 126 other bags.
+
+How many individual bags are required inside your single shiny gold bag?
+
+
+
+```{r}
+# unique is significantly shorter than full list
+# recursion is a bitch
+# come back to it later
+a <- data %>% filter(colour %in% layer_10) %>% pull(contains)
+
+data %>% filter(colour %in% a)
+
 ```
 

@@ -114,7 +114,55 @@ data <- tibble(data = read_file("./data/day_7_data.txt")) %>%
  c(layer_1, layer_2, layer_3, layer_4, layer_5, layer_6, layer_7, layer_8, layer_9, layer_10, contain_gold) %>%
    unique() %>%
    length()
- 
+```
+
+
+```{r}
+# shamelessly stolen from shanthan on discord
+# Part 1
+input <- read_delim("./data/day_7_data.txt", delim = "\n", col_names = "obs")
+
+b <- input %>%
+  mutate(
+    outer = str_extract(obs, "^(?:(?!\\sbag).)*"),
+    inner = str_extract_all(obs, "\\d+\\s(?:(?!\\sbag).)*")
+  ) %>%
+  unnest(inner, keep_empty = TRUE) %>%
+  mutate(
+    num = as.numeric(str_extract(inner, "^\\d+\\s")),
+    num = ifelse(is.na(num), 0, num), 
+    inner = str_remove(inner, "^(\\d+?)(.*?)(?<=\\s)"),
+    inner = ifelse(is.na(inner), "none", inner)
+  )
+
+
+# yeah, obviously do this(in retrospect)
+x <- "shiny gold"
+s <- NULL
+while (length(x) != 0) {
+  x <- b %>% filter(inner %in% x) %>% pull(outer)
+  s <- unique(c(s, x))
+}
+
+length(s) 
+
+
+
+
+# Part 2
+j <- tibble(inner = "shiny gold")
+t = 0
+while (nrow(j) != 0) {
+  j <- j %>% left_join(b, by = c("inner" = "outer")) %>%
+    uncount(num) %>% # does the opposite of count - adds n rows for each observation
+    transmute(inner = inner.y) # drops all other rows and makes just the one you define there
+  t <- t + nrow(j) # adds the new count  for each one
+}
+
+# I GET IT and this is way more concise than whatever the fuck i was trying to do
+t #Part 2
+
+
 
 ```
 
@@ -153,7 +201,56 @@ How many individual bags are required inside your single shiny gold bag?
 # come back to it later
 a <- data %>% filter(colour %in% layer_10) %>% pull(contains)
 
-data %>% filter(colour %in% a)
+
+
+contains <- function(data, x){
+  filt <- data %>% filter(colour == x)
+  filt %>% rename(cont = contains) %>%
+    left_join(data, by = c("cont" = "colour")) %>%
+    select(-cont) %>%
+    rename(cont = contains)
+}
+
+
+contains(data = data, x = "shinygold")
+
+input <- contains(data, "shinygold")
+
+recurse <- function(input, data = data){
+  input %>%
+    left_join(data, by = c("cont" = "colour")) %>%
+    select(-cont) %>%
+    rename(cont = contains)
+}
+
+recursion <- function(input){
+  while(input %>% filter(!is.na(cont)) %>% nrow() >0){
+    input <-  input  %>%
+  recurse(data = data)
+  }
+  input
+}
+
+full_breakdown <- contains(data = data, x = "shinygold") %>%
+  recursion() %>% 
+  distinct() %>% 
+  mutate(row = row_number(), .before = colour)
+
+
+
+library(Rfast)
+full <- full_breakdown %>% 
+  select(row, contains("n")) 
+
+full %>% 
+  pivot_longer(cols = 2:ncol(full),
+               values_drop_na = TRUE) %>%
+  mutate(value = as.numeric(value)) %>%
+  group_by(row) %>%
+  summarise (total = prod(value)) %>%
+  summarise(tot = sum(total))
+  
+ 
 
 
 

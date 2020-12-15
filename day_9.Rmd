@@ -58,19 +58,40 @@ The first step of attacking the weakness in the XMAS data is to find the first n
 
 ```{r}
 library(tidyverse)
-test <- c(35, 20, 15, 25, 47, 40, 62, 55, 65, 95, 102, 117, 150, 182, 127, 219, 299, 277, 309, 576)
+data <- c(35, 20, 15, 25, 47, 40, 62, 55, 65, 95, 102, 117, 150, 182, 127, 219, 299, 277, 309, 576)
 
-n <- test[6:length(test)]
-
-
-
-y <- 4
-x <- 1
+y <- 5
+n <- data[y+1:length(data)]
+x <- 5 
 z <- x:(x+y-1)
-b <- if_else(test[z] == n[x]/2,  n[x], n[x]-test[z])
+# b <- if_else(data[z] == n[x]/2,  n[x], n[x]-data[z])
+b <- n[x]-data[z]
+
 c <- n[x] - b
 any(b %in% c)
+
+
+# trying the next day
+xmas <- function(data, x, y = 5){
+  n <- data[y+1:length(data)]
+z <- x:(x+y-1)
+# b <- if_else(data[z] == n[x]/2,  n[x], n[x]-data[z])
+b <- n[x]-data[z]
+c <- n[x] - b
+any(b %in% c)
+}
+
+xmas(data = data, x = 10, y = 5)
+
+map_lgl(1:20, ~xmas(data = data, .x))
   
+
+
+
+
+
+
+
 # getting myself confused  and it is late
 XMAS <- function(data, x, y = 5){
   z <- x:(x+y-1)
@@ -87,6 +108,24 @@ map_lgl(1:length(test), ~XMAS(data = test, .x))
 n[x] == test[x:x+5]-test[x+5:x] 
 
 test[9]
+
+```
+
+
+```{r}
+data <-read_delim("./data/day_9_data.txt", delim = "\n", col_names = FALSE)$X1
+
+a <- map(1:(length(data)), ~xmas(data = data, .x, y = 25)) 
+tibble(a) %>% unnest_wider(a) %>% mutate(row = row_number()) %>% filter(...1 == FALSE)
+
+format(data, scientific = FALSE)  
+
+xmas(data = data, x = data[587], y = 25)
+
+290335714
+# YOUR ANSWER IS TOO LOW
+
+# YEAH I DUNNO
 
 ```
 

@@ -58,10 +58,10 @@ The first step of attacking the weakness in the XMAS data is to find the first n
 
 ```{r}
 library(tidyverse)
-data <- c(35, 20, 15, 25, 47, 40, 62, 55, 65, 95, 102, 117, 150, 182, 127, 219, 299, 277, 309, 576)
+test<- c(35, 20, 15, 25, 47, 40, 62, 55, 65, 95, 102, 117, 150, 182, 127, 219, 299, 277, 309, 576)
 
 y <- 5
-n <- data[y+1:length(data)]
+n <- test[y+1:length(test)]
 x <- 5 
 z <- x:(x+y-1)
 # b <- if_else(data[z] == n[x]/2,  n[x], n[x]-data[z])
@@ -81,9 +81,9 @@ c <- n[x] - b
 any(b %in% c)
 }
 
-xmas(data = data, x = 10, y = 5)
+xmas(data = test, x = 10, y = 5)
 
-map_lgl(1:20, ~xmas(data = data, .x))
+map_lgl(1:20, ~xmas(data = test, .x))
   
 
 
@@ -92,22 +92,22 @@ map_lgl(1:20, ~xmas(data = data, .x))
 
 
 
-# getting myself confused  and it is late
-XMAS <- function(data, x, y = 5){
-  z <- x:(x+y-1)
-  n <- data[x+y]
-  b <- if_else(data[z] == n/2,  n, n - data[z])
-  c <- n- b
-  any(b %in% c)
-}
-
-XMAS(data = test, x = 5)
-
-map_lgl(1:length(test), ~XMAS(data = test, .x))
-
-n[x] == test[x:x+5]-test[x+5:x] 
-
-test[9]
+# # getting myself confused  and it is late
+# XMAS <- function(data, x, y = 5){
+#   z <- x:(x+y-1)
+#   n <- data[x+y]
+#   b <- if_else(data[z] == n/2,  n, n - data[z])
+#   c <- n- b
+#   any(b %in% c)
+# }
+# 
+# XMAS(data = test, x = 5)
+# 
+# map_lgl(1:length(test), ~XMAS(data = test, .x))
+# 
+# n[x] == test[x:x+5]-test[x+5:x] 
+# 
+# test[9]
 
 ```
 
@@ -115,17 +115,169 @@ test[9]
 ```{r}
 data <-read_delim("./data/day_9_data.txt", delim = "\n", col_names = FALSE)$X1
 
-a <- map(1:(length(data)), ~xmas(data = data, .x, y = 25)) 
+a <- map_lgl(1:1000, ~xmas(data = data, .x, y = 25)) 
 tibble(a) %>% unnest_wider(a) %>% mutate(row = row_number()) %>% filter(...1 == FALSE)
 
-format(data, scientific = FALSE)  
+tibble(a) %>% mutate(num = row_number()) %>% filter(a == FALSE)
 
-xmas(data = data, x = data[587], y = 25)
+xmas(data = data, x = 290335714, y = 25)
 
-290335714
+data[587+25]
 # YOUR ANSWER IS TOO LOW
 
 # YEAH I DUNNO
 
+# YEAH I AM DUMB - IT WANTED THE NUMBER, NOT THE INDEX
+
+
+```
+
+--- Part Two ---
+The final step in breaking the XMAS encryption relies on the invalid number you just found: you must find a contiguous set of at least two numbers in your list which sum to the invalid number from step 1.
+
+Again consider the above example:
+
+35
+20
+15
+25
+47
+40
+62
+55
+65
+95
+102
+117
+150
+182
+127
+219
+299
+277
+309
+576
+In this list, adding up all of the numbers from 15 through 40 produces the invalid number from step 1, 127. (Of course, the contiguous set of numbers in your actual list might be much longer.)
+
+To find the encryption weakness, add together the smallest and largest number in this contiguous range; in this example, these are 15 and 47, producing 62.
+
+
+```{r}
+dat <-read_delim("./data/day_9_data.txt", delim = "\n", col_names = FALSE)$X1
+
+
+xmas_find<- function(dat = data, offset = 25){
+  a <- map_lgl(1:1000, ~xmas(data = dat, .x, y = offset)) 
+  names(a) <- 1:1000
+  a[a==FALSE]
+  find <- data[as.numeric(names(a[a==FALSE]))+offset]
+  find
+}
+
+xmas_find() 
+# 
+# xmas_break <- function(data = xmas_find(), x){ 
+# this <- x
+# that <- (this+1):(1000-this)
+# b <- data[this]+data[that]
+# b == find
+# }
+# xmas_break(x = 2)
+
+
+
+data[data == xmas_find()]
+
+xmas_break <- function(data, x, off){
+  y <- x
+  n <- data[x]
+m <- 0
+find <- xmas_find(dat = data, offset = off)
+if(n == find){ 
+  tibble(res = "fail") 
+  } else {
+  while (m < find){
+    m <- data[x]+m
+    x <- x+1
+  } 
+  if (m == find){
+    tibble(min = min(data[y]:data[x-1]), max = max(data[y:x-1]))
+    }  else {
+    tibble(res = "fail")
+  }
+  }
+}
+test
+# xmas_break(data = test, x = 3)
+
+# test
+# res <- map_df(1:length(test), ~xmas_break(data = test, x = .x, off = 5)) %>%
+#   filter(is.na(res)) %>%
+#   mutate(answer = min + max) %>% 
+#   pull(answer)
+
+xmas_break(data = dat, x = 300, off = 25)
+
+res <- map_df(1:length(dat), ~xmas_break(data = dat, x = .x, off = 25)) %>%
+  filter(is.na(res)) %>%
+  mutate(answer = min + max) %>% 
+  pull(answer)
+res
+```
+
+### All together now
+
+```{r}
+tictoc::tic()
+dat <-read_delim("./data/day_9_data.txt", delim = "\n", col_names = FALSE)$X1
+
+# generic rule
+xmas <- function(data, x, y = 5){
+  n <- data[y+1:length(data)]
+z <- x:(x+y-1)
+# b <- if_else(data[z] == n[x]/2,  n[x], n[x]-data[z])
+b <- n[x]-data[z]
+c <- n[x] - b
+any(b %in% c)
+}
+
+# PART 1
+# get the required number
+xmas_find<- function(dat = data, offset){
+  a <- map_lgl(1:1000, ~xmas(data = dat, .x, y = offset)) 
+  names(a) <- 1:1000
+  a[a==FALSE]
+  find <- data[as.numeric(names(a[a==FALSE]))+offset]
+  find
+}
+xmas_find(offset = 25)
+
+# PART 2
+# find the min/max of the contigous vector
+xmas_break <- function(data, x, off){
+  y <- x
+  n <- data[x]
+m <- 0
+find <- xmas_find(dat = data, offset = off)
+if(n == find){ 
+  tibble(res = "fail") 
+  } else {
+  while (m < find){
+    m <- data[x]+m
+    x <- x+1
+  } 
+  if (m == find){
+    tibble(min = min(data[y]:data[x-1]), max = max(data[y:x-1]))
+    }  else {
+    tibble(res = "fail")
+  }
+  }
+}
+# actual PART 2
+map_df(1:length(dat), ~xmas_break(data = dat, x = .x, off = 25)) %>%
+  filter(is.na(res)) %>%
+  mutate(answer = min + max) %>% 
+  pull(answer)
+tictoc::toc()
 ```
 

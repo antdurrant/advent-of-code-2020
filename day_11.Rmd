@@ -102,8 +102,8 @@ Simulate your seating area by applying the seating rules repeatedly until no sea
 = . = NA
 
 RULES
-- 0 and no adjacent seats occupied > 1
-- 1 and >= 4 adjacent seats occupied > 0
+- L and no adjacent seats # > 1
+- # and >= 4 adjacent seats # > 0
 - else, no change
 
 ```{r}
@@ -111,7 +111,80 @@ RULES
 library(tidyverse)
 input <- str_split(read_delim("./data/day_11_data.txt", delim = "/n", col_names = F)$X1, pattern = "", simplify = TRUE) 
 dim(input)
-input
+
+
+fill_seats <- function( input){
+  
+  x <- 1
+  y <- 1
+
+move_x <- while (x <= dim(input)[1]){
+  z <- if(x-1 == 0) c(x:(x+1)) else if (x+1 == 96) c((x-1):x) else c((x-1):(x+1))
+  a <- if(y-1 == 0) c(y:(y+1)) else if (y+1 == 96) c((y-1):y) else c((y-1):(y+1))
+  check <- input[z,a]
+
+input[x] <- dplyr::case_when(input[x] == "L" & length(check == "L") == length(check) ~ "#",
+                            input[x]  == "#" & length(check == "#") >= 5 ~ "L",
+                            TRUE ~ input[x] 
+                            )
+x <- x + 1
+} 
+
+while (y <= dim(input)[2]) {
+  move_x
+  y = y + 1
+  }
+}
+
+
+fill_seats(input = input)
+
+
+dim(input)
+
+```
+
+
+
+
+### Summary
+
+- L = empty
+- # = full
+= . = not a seat
+
+RULES
+- L and no adjacent seats # > 1
+- # and >= 4 adjacent seats # > 0
+- else, no change
+
+
+```{r}
+library(tidyverse)
+input <- str_split(read_delim("./data/day_11_data.txt", delim = "/n", col_names = F)$X1, pattern = "", simplify = TRUE) 
+dim(input)
+```
+
+```{r}
+
+
+x <- 1
+y <- 1
+
+changes <- function(input, x,y){
+  
+  
+  
+surround <- input[(y-1):(y+1),(x-1):(x+1)]
+
+input[x,y] <- case_when(input[x,y] == "L" & sum(surround == "L") == length(surround) ~ "#",
+                        input[x,y] == "#" & sum(surround == "#") >= 5 ~ "#",
+                        TRUE ~ input[x,y])
+
+x + 1
+}
+
+str(input)
 
 ```
 
